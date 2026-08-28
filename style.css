@@ -29,9 +29,9 @@ nav a {
     font-weight: bold;
 }
 
-nav a:hover {
+/* nav a:hover {
     text-decoration: underline;
-}
+} */
 
 main {
     max-width: 850px;
