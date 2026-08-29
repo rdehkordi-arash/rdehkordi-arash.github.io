@@ -66,5 +66,9 @@ footer {
     margin-bottom: 18px;
 }
 
+#publications li:last-child {
+    margin-bottom: 0;
+}
+
 
 
