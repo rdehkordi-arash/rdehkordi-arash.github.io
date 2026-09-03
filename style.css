@@ -110,6 +110,15 @@ footer {
     margin-bottom: 0;
 }
 
+@media (max-width: 700px) {
+
+    .project-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
 
 
 
