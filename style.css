@@ -34,7 +34,8 @@ nav a {
 } */
 
 main {
-    max-width: 850px;
+    width: 93%;
+    max-width: 950px;
     margin: 40px auto;
     padding: 0 20px;
 }
