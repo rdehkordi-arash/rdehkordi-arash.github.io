@@ -110,12 +110,12 @@ footer {
     gap: 25px;
 }
 
-/* Phone: 1 column */
+/* /* Phone: 1 column */
 @media (max-width: 700px) {
     .project-grid {
         grid-template-columns: 1fr;
     }
-}
+} */
 
 
 
