@@ -110,11 +110,6 @@ footer {
     margin-bottom: 0;
 }
 
-.project-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 25px;
-}
 
 /* For phones */
 @media (max-width: 700px) {
