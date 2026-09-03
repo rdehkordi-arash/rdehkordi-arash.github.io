@@ -80,7 +80,7 @@ footer {
 
 .project-card {
     background-color: white;
-    border: 5px solid #ddd;
+    border: 1px solid #ddd;
     border-radius: 12px;
     overflow: hidden;
 }
