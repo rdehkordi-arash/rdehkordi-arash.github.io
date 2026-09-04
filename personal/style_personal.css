@@ -26,9 +26,9 @@ body {
 .personal-header {
     max-width: 1200px;
 
-    margin: 30px auto;
+    margin: 25px auto;
 
-    padding: 35px 30px;
+    padding: 25px 20px;
 
     background-color: white;
 
@@ -194,9 +194,9 @@ body {
 .personal-footer {
     max-width: 1200px;
 
-    margin: 30px auto;
+    margin: 25px auto;
 
-    padding: 20px;
+    padding: 5px;
 
     text-align: center;
 
