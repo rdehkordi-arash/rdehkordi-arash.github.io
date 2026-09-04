@@ -26,9 +26,9 @@ body {
 .personal-header {
     max-width: 1200px;
 
-    margin: 20px auto;
+    margin: 15px auto;
 
-    padding: 20px 15px;
+    padding: 10px 5px;
 
     background-color: white;
 
@@ -56,9 +56,9 @@ body {
 .personal-nav {
     max-width: 1200px;
 
-    margin: 0 auto 20px auto;
+    margin: 0 auto 15px auto;
 
-    padding: 10px 15px;
+    padding: 5px 10px;
 
     background-color: white;
 
