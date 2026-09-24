@@ -1,67 +1,55 @@
-// Get all clickable project titles
 const projectLinks = document.querySelectorAll(".project-link");
 
-// Get all project modals
-const projectModals = document.querySelectorAll(".project-modal");
+const projectModal = document.getElementById("project-modal");
 
-// Get all close buttons
-const closeButtons = document.querySelectorAll(".close-modal");
+const projectModalBody = document.getElementById("project-modal-body");
+
+const closeModal = document.querySelector(".close-modal");
 
 
-// OPEN MODAL
 projectLinks.forEach(link => {
 
-    link.addEventListener("click", function () {
+    link.addEventListener("click", async function () {
 
-        // Read the modal ID from data-modal
-        const modalId = this.dataset.modal;
+        // Find which project HTML file this button points to
+        const projectFile = this.dataset.project;
 
-        // Find that modal
-        const modal = document.getElementById(modalId);
+        // Load that HTML file
+        const response = await fetch(projectFile);
 
-        // Open it
-        modal.classList.add("active");
-    });
+        const projectHTML = await response.text();
 
-});
+        // Put the project HTML inside the modal
+        projectModalBody.innerHTML = projectHTML;
 
-
-// CLOSE MODAL USING X BUTTON
-closeButtons.forEach(button => {
-
-    button.addEventListener("click", function () {
-
-        const modal = this.closest(".project-modal");
-
-        modal.classList.remove("active");
-    });
-
-});
-
-
-// CLOSE MODAL BY CLICKING OUTSIDE THE CONTENT
-projectModals.forEach(modal => {
-
-    modal.addEventListener("click", function (event) {
-
-        if (event.target === modal) {
-            modal.classList.remove("active");
-        }
+        // Open the modal
+        projectModal.classList.add("active");
 
     });
 
 });
 
 
-// CLOSE MODAL WITH ESC KEY
+closeModal.addEventListener("click", function () {
+
+    projectModal.classList.remove("active");
+
+});
+
+
+projectModal.addEventListener("click", function (event) {
+
+    if (event.target === projectModal) {
+        projectModal.classList.remove("active");
+    }
+
+});
+
+
 document.addEventListener("keydown", function (event) {
 
     if (event.key === "Escape") {
-
-        projectModals.forEach(modal => {
-            modal.classList.remove("active");
-        });
-
+        projectModal.classList.remove("active");
     }
 
 });
