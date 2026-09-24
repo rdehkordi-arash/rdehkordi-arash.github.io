@@ -22,6 +22,8 @@ projectLinks.forEach(link => {
         // Put the project HTML inside the modal
         projectModalBody.innerHTML = projectHTML;
 
+        if (window.MathJax) {MathJax.typesetPromise([projectModalBody]);}
+
         // Open the modal
         projectModal.classList.add("active");
 
