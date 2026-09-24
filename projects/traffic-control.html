@@ -1,59 +1,307 @@
+<!-- PROJECT: HETEROGENEOUS HIGHWAY TRAFFIC CONTROL -->
+<!-- Fragment loaded dynamically into the common project modal. -->
+
 <div class="project-detail">
 
-    <h2>Heterogeneous Highway Traffic Control</h2>
+<header class="modal-project-header">
+    <p class="modal-project-kicker">Intelligent Transportation Systems · Nonlinear Control · Model Predictive Control</p>
+    <h2>Traffic Density Control for Heterogeneous Highway Systems</h2>
+    <p class="modal-project-subtitle">
+        Constrained traffic control for mixed autonomous and human-driven vehicles
+        using Feedback Linearization and Model Predictive Control.
+    </p>
+</header>
 
-    <p class="project-subtitle">
-        Feedback Linearization and Model Predictive Control for
-        mixed autonomous and human-driven traffic.
+<section class="modal-project-section">
+    <h3>Overview</h3>
+    <p>
+        This project addresses traffic congestion in heterogeneous highway corridors
+        containing both <strong>autonomous vehicles (AVs)</strong> and
+        <strong>human-driven vehicles (HVs)</strong>. Traffic dynamics are represented
+        using a heterogeneous METANET model, while variable speed commands are used to
+        regulate vehicle densities and move congested cells toward free-flow conditions.
+    </p>
+    <p>
+        The main challenge is that the traffic dynamics are nonlinear while the actual
+        speed-control commands are physically constrained. A hybrid
+        <strong>Feedback Linearization–Model Predictive Control (FL–MPC)</strong>
+        architecture addresses these two problems together. Feedback Linearization
+        transforms the nonlinear density dynamics into a linear input-output form,
+        while MPC determines the virtual control commands subject to the physical limits.
+    </p>
+    <div class="project-highlight">
+        <strong>Main idea:</strong> use Feedback Linearization to handle the nonlinear
+        traffic dynamics and MPC to enforce physical control limits, with a new
+        constraint-mapping method connecting the virtual MPC commands to the actual
+        variable-speed commands.
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>Heterogeneous Highway Model</h3>
+    <p>
+        The highway is divided into a sequence of cells. Each cell contains AVs and HVs,
+        and each class is characterized by its density, average velocity, and traffic
+        flow. For vehicle class \(c \in \{A,H\}\), conservation of vehicles gives
+    </p>
+    <div class="project-equation">
+        \[
+        \dot{\rho}_{i,c}(t)
+        =
+        \frac{1}{\ell_i\gamma_i}
+        \left(q_{i-1,c}(t)-q_{i,c}(t)\right),
+        \qquad
+        q_{i,c}=\rho_{i,c}v_{i,c}.
+        \]
+    </div>
+    <p>
+        Here, \(\rho_{i,c}\), \(v_{i,c}\), and \(q_{i,c}\) denote density, average
+        velocity, and outflow. The heterogeneous METANET formulation also captures
+        interactions between the vehicle classes and distinguishes free-flow,
+        semi-congested, and congested operating regions.
+    </p>
+    <div class="project-figure-placeholder">
+        <strong>FIGURE PLACEHOLDER</strong><br>
+        Highway corridor / heterogeneous METANET schematic<br>
+        <small>Suggested: cells, AV/HV densities, velocities, and flows.</small>
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>Control Objective</h3>
+    <p>
+        The objective is to regulate the AV and HV densities of congested cells toward
+        desired reference densities. The control action is implemented through suggested
+        vehicle velocities:
+    </p>
+    <div class="project-equation">
+        \[
+        U_{i,c}=(1-u_{i,c})V_{i,c},
+        \qquad
+        0\leq u_{i,c}\leq u_{i,c,\max}.
+        \]
+    </div>
+    <p>
+        The controller must therefore reduce congestion without requesting inadmissible
+        speed commands. Because a cell's density depends on both incoming and outgoing
+        traffic, density regulation involves commands applied to neighboring cells,
+        leading to an <strong>over-actuated</strong> control problem.
+    </p>
+</section>
+
+<section class="modal-project-section">
+    <h3>1. Feedback Linearization</h3>
+    <p>
+        Traffic density is selected as the controlled output. Differentiating density
+        until the control commands appear gives, for a block of adjacent cells,
+    </p>
+    <div class="project-equation">\[\ddot{\rho}_{c}=F_c+G_cu_c.\]</div>
+    <p>A right-inverse matrix \(H_c\) is selected such that</p>
+    <div class="project-equation">\[G_cH_c=I.\]</div>
+    <p>The feedback-linearizing control law is</p>
+    <div class="project-equation">\[u_c=H_c\left[-F_c+\nu_c\right],\]</div>
+    <p>which transforms the nonlinear density dynamics into</p>
+    <div class="project-equation">\[\boxed{\ddot{\rho}_c=\nu_c}.\]</div>
+    <p>
+        The signal \(\nu_c\) is a <strong>virtual control input</strong>. Instead of
+        selecting it with a conventional FL tracking law, MPC determines it so that the
+        resulting physical commands \(u_c\) remain feasible.
+    </p>
+</section>
+
+<section class="modal-project-section">
+    <h3>2. Model Predictive Control</h3>
+    <p>
+        After Feedback Linearization, MPC operates on the linearized density dynamics.
+        At each control step it predicts future density evolution and chooses virtual
+        commands that balance reference tracking, control effort, and smooth command
+        changes.
+    </p>
+    <div class="project-equation">
+        \[
+        J_c =
+        \sum_{j=0}^{N_p}
+        \left(
+        \|y_c(k+j)-\rho_c^{*}(k+j)\|_{Q}^{2}
+        +
+        \|\nu_c(k+j)\|_{R}^{2}
+        +
+        \|\Delta\nu_c(k+j)\|_{S}^{2}
+        \right).
+        \]
+    </div>
+    <p>
+        MPC computes \(\nu_c\), but the physical constraints are imposed on \(u_c\).
+        A constraint-mapping method is therefore needed to connect the two.
+    </p>
+    <div class="project-figure-placeholder">
+        <strong>FIGURE PLACEHOLDER</strong><br>
+        FL–MPC control architecture<br>
+        <small>Suggested: reference → MPC → virtual input \(\nu\) → FL → physical command \(u\) → traffic.</small>
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>3. Constraint Mapping for the Over-Actuated System</h3>
+    <p>
+        Substituting the FL control law into the physical input bounds maps the
+        admissible actual commands into inequalities on the virtual command:
+    </p>
+    <div class="project-equation">
+        \[
+        H_cF_c \leq H_c\nu_c \leq H_cF_c+u_{c,\max}.
+        \]
+    </div>
+    <p>
+        Since there are more physical control inputs than controlled density outputs,
+        \(G_c\) is rectangular and the choice of right inverse matters. Using only the
+        Moore–Penrose pseudoinverse can produce an unsuitable or infeasible
+        virtual-command constraint set.
+    </p>
+    <p>
+        The proposed method exploits the null space of \(G_c\). A family of valid right
+        inverses can be expressed as
+    </p>
+    <div class="project-equation">
+        \[
+        H_c=G_c^{\dagger}+\Phi_c\Lambda_c.
+        \]
+    </div>
+    <p>
+        Candidate matrices are generated so that one row of \(H_c\) becomes zero,
+        converting the overdetermined constraint mapping into a solvable square form.
+    </p>
+    <div class="project-highlight">
+        <strong>At each update:</strong> candidate constraint mappings are constructed,
+        the MPC problem is solved for each candidate, and the solution with the minimum
+        MPC cost is selected. Its virtual command is then converted into the actual
+        speed-control command through Feedback Linearization.
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>4. Real-Time Reference Density Generation</h3>
+    <p>
+        Reference selection is more complicated in heterogeneous traffic than in a
+        single-class highway. A mixed AV/HV system has two density coordinates and
+        several traffic phases, so a single critical-density reference is insufficient.
+    </p>
+    <p>
+        For a congested cell, the proposed method uses the current AV/HV density
+        combination and identifies a desired density pair on the free-flow boundary.
+        The reference therefore adapts to both congestion severity and AV-to-HV traffic
+        composition.
+    </p>
+    <div class="project-figure-placeholder">
+        <strong>FIGURE PLACEHOLDER</strong><br>
+        AV/HV density reference-generation diagram<br>
+        <small>Suggested: flow contour, free-flow boundary, congested point, and generated reference.</small>
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>Overall Control Procedure</h3>
+    <div class="project-highlight">
+        <strong>Measure → Generate Reference → Linearize → Map Constraints → Optimize → Apply</strong>
+    </div>
+    <ol class="project-steps">
+        <li>Measure the current AV/HV states and update the reference densities.</li>
+        <li>Update the Feedback Linearization terms \(F_c\) and \(G_c\).</li>
+        <li>Compute the null space of \(G_c\) and construct candidate right inverses \(H_c\).</li>
+        <li>Map the physical control bounds into virtual-input constraints.</li>
+        <li>Solve MPC for the candidate mappings and select the minimum-cost solution.</li>
+        <li>Convert \(\nu_c^{*}\) into \(u_c^{*}\) and apply the corresponding suggested velocities.</li>
+    </ol>
+</section>
+
+<section class="modal-project-section">
+    <h3>Simulation Study</h3>
+    <p>
+        The controller was evaluated on a <strong>three-lane highway divided into eight
+        2-km cells</strong>. Cells \(C_4\), \(C_5\), and \(C_6\) were initially
+        congested, with \(C_4\) and \(C_6\) close to jam conditions. Suggested
+        velocities were applied to cells \(C_3\) through \(C_6\).
+    </p>
+    <p>
+        The traffic model used a 5-second simulation time step and a 1-minute MPC
+        control period, with prediction and control horizons \(N_p=20\) and \(N_u=10\).
+        Three cases were compared: no control, control of both AVs and HVs, and control
+        of AVs only.
     </p>
 
-
-    <section class="project-section">
-
-        <h3>Overview</h3>
-
-        <p>
-            This project develops...
-        </p>
-
-    </section>
-
-
-    <section class="project-section">
-
-        <h3>Traffic Model</h3>
-
-        <p>
-            The highway is divided into...
-        </p>
-
-        <div class="project-equation">
-            \[
-            \dot{\rho}_{i,c}
-            =
-            \frac{1}{\ell_i\gamma_i}
-            (q_{i-1,c}-q_{i,c})
-            \]
+    <div class="result-summary-grid">
+        <div class="result-summary-card">
+            <span class="result-number">68 min</span>
+            <span class="result-label">No Control</span>
         </div>
+        <div class="result-summary-card">
+            <span class="result-number">62 min</span>
+            <span class="result-label">AV-Only Control · 9% Faster</span>
+        </div>
+        <div class="result-summary-card">
+            <span class="result-number">60 min</span>
+            <span class="result-label">AV + HV Control · 11% Faster</span>
+        </div>
+    </div>
 
-    </section>
+    <p>
+        Without control, congestion cleared after approximately 68 minutes. Controlling
+        both classes reduced this to approximately 60 minutes. Importantly, applying
+        commands <strong>only to AVs</strong> cleared congestion in approximately
+        62 minutes—nearly the improvement obtained by controlling both classes, but
+        with fewer interventions.
+    </p>
 
+    <div class="project-figure-placeholder">
+        <strong>FIGURE PLACEHOLDER</strong><br>
+        Density evolution: No Control vs. Both-Class Control vs. AV-Only Control<br>
+        <small>Suggested: the three density plots used for the simulation comparison.</small>
+    </div>
+</section>
 
-    <section class="project-section">
+<section class="modal-project-section">
+    <h3>How Does the Controller Reduce Congestion?</h3>
+    <p>
+        The controller redistributes traffic in space rather than simply maximizing
+        instantaneous flow. In the simulations, vehicles are temporarily concentrated
+        upstream so that the downstream congested region can recover more quickly.
+    </p>
+    <p>
+        In the AV-only case, the controller frequently recommends a lower velocity in
+        cell \(C_3\), reducing inflow into congested cell \(C_4\). Cell \(C_6\), in
+        contrast, often receives no restrictive command, allowing vehicles to leave the
+        congested region as quickly as the traffic state permits. After congestion is
+        relieved, the controlled highway exhibits smoother and higher traffic flow.
+    </p>
+    <div class="project-figure-placeholder">
+        <strong>FIGURE PLACEHOLDER</strong><br>
+        AV-only control commands, suggested velocities, and traffic flow
+    </div>
+</section>
 
-        <h3>Control Approach</h3>
+<section class="modal-project-section project-takeaways">
+    <h3>Key Contributions &amp; Takeaways</h3>
+    <ul>
+        <li>A hybrid <strong>FL–MPC</strong> framework for nonlinear heterogeneous highway traffic with bounded speed commands.</li>
+        <li>A <strong>null-space-based constraint-mapping method</strong> linking physical input limits to FL virtual commands in an over-actuated system.</li>
+        <li>A <strong>real-time AV/HV reference-density generation method</strong> adapting to congestion and traffic composition.</li>
+        <li>Simulations show that <strong>controlling only AVs can still substantially reduce congestion</strong>, with clearance time close to controlling both classes.</li>
+    </ul>
+</section>
 
-        ...
-
-    </section>
-
-
-    <section class="project-section">
-
-        <h3>Results</h3>
-
-        ...
-
-    </section>
+<section class="modal-project-section project-publication">
+    <h3>Related Publication</h3>
+    <p>
+        <strong>Arash Rahmanidehkordi</strong> and Amir H. Ghasemi,
+        “Traffic Density Control for Heterogeneous Highway Systems With Input Constraints,”
+        <em>IEEE Control Systems Letters</em>, vol. 8, pp. 2787–2792, 2024.
+    </p>
+    <p>
+        <a href="https://doi.org/10.1109/LCSYS.2024.3516073"
+           target="_blank" rel="noopener noreferrer">
+            DOI: 10.1109/LCSYS.2024.3516073
+        </a>
+    </p>
+</section>
 
 </div>
