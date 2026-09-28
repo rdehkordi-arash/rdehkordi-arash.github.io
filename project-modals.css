@@ -1,1 +1,552 @@
 
+
+/* =========================================================
+   PROJECT MODAL
+   Shared styling for all detailed project pages
+========================================================= */
+
+
+/* ---------- Dark background behind popup ---------- */
+
+.project-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    padding: 28px;
+
+    background: rgba(15, 20, 28, 0.72);
+
+    overflow-y: auto;
+}
+
+
+/* Modal becomes visible when JavaScript adds "active" */
+
+.project-modal.active {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+
+/* ---------- Main white project window ---------- */
+
+.project-modal-content {
+    position: relative;
+
+    width: min(1000px, 100%);
+    margin: 25px auto;
+
+    padding: 48px 58px 55px;
+
+    background: #ffffff;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.20),
+        0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ---------- Close button ---------- */
+
+.close-modal {
+    position: absolute;
+
+    top: 16px;
+    right: 18px;
+
+    width: 36px;
+    height: 36px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f2f3f5;
+
+    color: #444;
+
+    font-size: 22px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease,
+                transform 0.2s ease;
+}
+
+.close-modal:hover {
+    background: #e5e7ea;
+    transform: scale(1.06);
+}
+
+
+
+/* =========================================================
+   PROJECT CONTENT
+========================================================= */
+
+.project-detail {
+    color: #25282d;
+
+    font-size: 0.94rem;
+    line-height: 1.72;
+}
+
+
+/* ---------- Top header ---------- */
+
+.modal-project-header {
+    text-align: center;
+
+    max-width: 850px;
+
+    margin: 0 auto 42px;
+    padding: 8px 10px 34px;
+
+    border-bottom: 1px solid #e3e5e8;
+}
+
+
+/* Keywords above title */
+
+.modal-project-kicker {
+    margin: 0 0 15px;
+
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+
+    color: #66717d;
+}
+
+
+/* Main project title */
+
+.modal-project-header h2 {
+    margin: 0 0 16px;
+
+    font-size: 1.75rem;
+    line-height: 1.25;
+
+    font-weight: 700;
+
+    color: #17191c;
+}
+
+
+/* Description under title */
+
+.modal-project-subtitle {
+    max-width: 760px;
+
+    margin: 0 auto;
+
+    font-size: 0.98rem;
+    line-height: 1.6;
+
+    color: #555d66;
+}
+
+
+
+/* =========================================================
+   PROJECT SECTIONS
+========================================================= */
+
+.modal-project-section {
+    margin: 0 0 42px;
+}
+
+
+/* Section headings */
+
+.modal-project-section h3 {
+    position: relative;
+
+    margin: 0 0 17px;
+    padding-bottom: 9px;
+
+    font-size: 1.18rem;
+    line-height: 1.35;
+
+    font-weight: 700;
+
+    color: #20242a;
+
+    border-bottom: 1px solid #e7e9ec;
+}
+
+
+/* Small accent under section heading */
+
+.modal-project-section h3::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    bottom: -1px;
+
+    width: 45px;
+    height: 2px;
+
+    background: #555f6d;
+}
+
+
+/* Paragraphs */
+
+.modal-project-section p {
+    margin: 0 0 15px;
+}
+
+
+/* Bold important terminology */
+
+.modal-project-section strong {
+    font-weight: 650;
+    color: #17191c;
+}
+
+
+
+/* =========================================================
+   HIGHLIGHT / MAIN IDEA BOX
+========================================================= */
+
+.project-highlight {
+    margin: 22px 0;
+
+    padding: 17px 20px;
+
+    background: #f6f7f9;
+
+    border-left: 3px solid #596574;
+    border-radius: 0 8px 8px 0;
+
+    font-size: 0.91rem;
+    line-height: 1.65;
+
+    color: #353b43;
+}
+
+
+
+/* =========================================================
+   EQUATIONS
+========================================================= */
+
+.project-equation {
+    max-width: 100%;
+
+    margin: 22px 0;
+
+    padding: 15px 18px;
+
+    overflow-x: auto;
+
+    text-align: center;
+
+    background: #fafbfc;
+
+    border: 1px solid #e5e7ea;
+    border-radius: 9px;
+
+    font-size: 0.94rem;
+}
+
+
+
+/* =========================================================
+   FIGURES
+========================================================= */
+
+.project-figure {
+    margin: 28px auto;
+
+    text-align: center;
+}
+
+
+.project-figure img {
+    display: block;
+
+    max-width: 100%;
+    height: auto;
+
+    margin: 0 auto;
+
+    border-radius: 8px;
+}
+
+
+.project-figure figcaption {
+    max-width: 760px;
+
+    margin: 10px auto 0;
+
+    font-size: 0.79rem;
+    line-height: 1.5;
+
+    color: #707780;
+}
+
+
+/* Temporary placeholders */
+
+.project-figure-placeholder {
+    margin: 25px 0;
+
+    padding: 38px 25px;
+
+    text-align: center;
+
+    background: #f7f8fa;
+
+    border: 1px dashed #bfc5cc;
+    border-radius: 10px;
+
+    color: #68717b;
+
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.project-figure-placeholder strong {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+
+    color: #555e68;
+}
+
+
+
+/* =========================================================
+   ALGORITHM / STEPS
+========================================================= */
+
+.project-steps {
+    margin: 20px 0;
+    padding-left: 24px;
+}
+
+
+.project-steps li {
+    margin-bottom: 10px;
+    padding-left: 5px;
+}
+
+
+
+/* =========================================================
+   RESULT SUMMARY CARDS
+========================================================= */
+
+.result-summary-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 14px;
+
+    margin: 26px 0 28px;
+}
+
+
+.result-summary-card {
+    padding: 20px 12px;
+
+    text-align: center;
+
+    background: #f7f8fa;
+
+    border: 1px solid #e1e4e8;
+    border-radius: 10px;
+}
+
+
+.result-number {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+
+    color: #20242a;
+}
+
+
+.result-label {
+    display: block;
+
+    font-size: 0.78rem;
+    line-height: 1.4;
+
+    color: #68717b;
+}
+
+
+
+/* =========================================================
+   KEY TAKEAWAYS
+========================================================= */
+
+.project-takeaways {
+    padding: 25px 28px;
+
+    background: #f7f8fa;
+
+    border: 1px solid #e2e5e8;
+    border-radius: 11px;
+}
+
+
+.project-takeaways ul {
+    margin: 5px 0 0;
+    padding-left: 21px;
+}
+
+
+.project-takeaways li {
+    margin-bottom: 11px;
+    padding-left: 4px;
+}
+
+
+
+/* =========================================================
+   PUBLICATION
+========================================================= */
+
+.project-publication {
+    margin-top: 45px;
+
+    padding: 24px 27px;
+
+    background: #f5f6f8;
+
+    border-radius: 10px;
+}
+
+
+.project-publication h3 {
+    margin-top: 0;
+}
+
+
+.project-publication p {
+    margin-bottom: 8px;
+
+    font-size: 0.88rem;
+}
+
+
+.project-publication a {
+    color: #3f5f80;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+
+.project-publication a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .project-modal {
+        padding: 8px;
+    }
+
+    .project-modal-content {
+        margin: 8px auto;
+
+        padding: 42px 20px 32px;
+
+        border-radius: 11px;
+    }
+
+    .close-modal {
+        top: 8px;
+        right: 8px;
+    }
+
+
+    /* Header */
+
+    .modal-project-header {
+        margin-bottom: 32px;
+        padding-bottom: 27px;
+    }
+
+    .modal-project-kicker {
+        font-size: 0.68rem;
+        line-height: 1.5;
+    }
+
+    .modal-project-header h2 {
+        font-size: 1.42rem;
+    }
+
+    .modal-project-subtitle {
+        font-size: 0.88rem;
+    }
+
+
+    /* Content */
+
+    .project-detail {
+        font-size: 0.89rem;
+        line-height: 1.68;
+    }
+
+    .modal-project-section {
+        margin-bottom: 34px;
+    }
+
+    .modal-project-section h3 {
+        font-size: 1.08rem;
+    }
+
+
+    /* Equations */
+
+    .project-equation {
+        padding: 13px 10px;
+
+        font-size: 0.86rem;
+    }
+
+
+    /* Results become vertical */
+
+    .result-summary-grid {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+
+    .project-takeaways,
+    .project-publication {
+        padding: 20px;
+    }
+}
