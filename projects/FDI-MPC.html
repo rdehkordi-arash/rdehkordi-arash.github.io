@@ -1,0 +1,403 @@
+<!-- =========================================================
+     PROJECT: FILTERED DYNAMIC INVERSION + MPC
+     Robust constrained control with limited model knowledge
+========================================================== -->
+
+<div class="project-detail">
+
+    <!-- ==================== TITLE ==================== -->
+    <header class="modal-project-header">
+
+        <p class="modal-project-kicker">
+            Robust Control · Dynamic Inversion · Model Predictive Control · Constraint Handling
+        </p>
+
+        <h2>Filtered Dynamic Inversion for Constrained Uncertain Systems</h2>
+
+        <p class="modal-project-subtitle">
+            Integrating Filtered Dynamic Inversion with Model Predictive Control
+            for disturbance rejection and actuator-constraint enforcement under
+            limited plant knowledge.
+        </p>
+
+    </header>
+
+
+    <!-- ==================== OVERVIEW ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Overview</h3>
+
+        <p>
+            This project develops a hybrid <strong>Filtered Dynamic Inversion–Model
+            Predictive Control (FDI–MPC)</strong> framework for uncertain linear systems
+            subjected to <strong>unknown and unmeasured disturbances</strong> and
+            actuator constraints.
+        </p>
+
+        <p>
+            Conventional Dynamic Inversion (DI) can provide a convenient linearized
+            input-output representation, but requires detailed knowledge of the plant,
+            state information, and disturbance terms. Filtered Dynamic Inversion (FDI)
+            substantially reduces these requirements and provides robust disturbance
+            rejection; however, it does not inherently prevent actuator saturation.
+            MPC provides the missing constraint-handling capability.
+        </p>
+
+        <div class="project-highlight">
+            <strong>Main idea:</strong>
+            use FDI for robust control with limited model knowledge, MPC to select the
+            virtual control input, and a new <strong>constraint-mapping algorithm</strong>
+            to guarantee that the actual filtered actuator command remains within its
+            prescribed limits.
+        </div>
+
+    </section>
+
+
+    <!-- ==================== PROBLEM ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Control Problem</h3>
+
+        <p>
+            Consider an uncertain MIMO linear system subjected to an unmeasured
+            disturbance:
+        </p>
+
+        <div class="project-equation">
+            \[
+            \dot{x}=Ax+Bu+w,
+            \qquad
+            y=Cx+Du,
+            \]
+        </div>
+
+        <p>
+            with actuator constraints
+        </p>
+
+        <div class="project-equation">
+            \[
+            u_{\min}\leq u(t)\leq u_{\max}.
+            \]
+        </div>
+
+        <p>
+            The objective is to make the output \(y\) follow a desired reference while
+            rejecting disturbances and respecting the actuator limits. The plant
+            matrices, states, initial condition, and disturbance are not assumed to be
+            available to the controller. Instead, the required plant information is
+            limited to the system's <strong>relative degree</strong> and
+            <strong>first nonzero Markov parameter</strong>.
+        </p>
+
+    </section>
+
+
+    <!-- ==================== FDI ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Filtered Dynamic Inversion</h3>
+
+        <p>
+            For a system with relative degree \(d\), ideal Dynamic Inversion constructs
+            a control input that produces the desired virtual input \(\nu\). Its direct
+            implementation, however, depends on unavailable model, state, and disturbance
+            information.
+        </p>
+
+        <p>
+            FDI overcomes this limitation by passing the ideal inversion command through
+            a stable high-gain low-pass filter. The resulting implementable control law
+            can be written as
+        </p>
+
+        <div class="project-equation">
+            \[
+            \left[\eta_z(p)-\eta_z(0)\right]u
+            =
+            \eta_z(0)H_d^{-1}
+            \left(\nu-p^d y\right),
+            \]
+        </div>
+
+        <p>
+            where \(H_d\) is the first nonzero Markov parameter and
+            \(\eta_z(p)\) defines the FDI filter. Consequently, the controller requires
+            only \(d\), \(H_d\), and the measured output and its history rather than the
+            complete plant model.
+        </p>
+
+        <div class="project-highlight">
+            <strong>Robustness advantage:</strong>
+            unknown disturbances do not need to be measured or explicitly estimated
+            in order to construct the FDI control command.
+        </div>
+
+    </section>
+
+
+    <!-- ==================== MPC ==================== -->
+    <section class="modal-project-section">
+
+        <h3>FDI–MPC Architecture</h3>
+
+        <p>
+            For sufficiently large filter gain, the FDI-controlled plant approximately
+            behaves as a chain of integrators:
+        </p>
+
+        <div class="project-equation">
+            \[
+            p^d y \approx \nu.
+            \]
+        </div>
+
+        <p>
+            This simple input-output representation is used as the prediction model for
+            MPC. Rather than directly computing the physical actuator command, MPC
+            determines the virtual input \(\nu\) that minimizes tracking error and
+            control effort.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            FDI–MPC control architecture<br>
+            <small>
+                Suggested: reference → MPC virtual input \(\nu\) → FDI filter →
+                constrained actuator command \(u\) → uncertain plant.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== CONSTRAINT MAPPING ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Dynamic Constraint Mapping</h3>
+
+        <p>
+            A central challenge is that MPC does not directly command the actuator.
+            The MPC output \(\nu\) first passes through the FDI filter before producing
+            the physical input \(u\). Therefore, simply imposing the actuator limits
+            directly on \(\nu\) does not guarantee that \(u\) will remain feasible.
+        </p>
+
+        <p>
+            The proposed method constructs a state-space representation of the
+            <strong>known filter dynamics</strong> and dynamically maps the actuator
+            constraints into corresponding bounds on the MPC virtual input:
+        </p>
+
+        <div class="project-equation">
+            \[
+            \nu_{\min}(k)
+            \leq
+            \nu(k)
+            \leq
+            \nu_{\max}(k).
+            \]
+        </div>
+
+        <p>
+            These bounds vary with the filter state, the history of the applied input,
+            and the measured output derivative. As a result, MPC can optimize \(\nu\)
+            while ensuring that the actual filtered command satisfies
+            \(u_{\min}\leq u\leq u_{\max}\).
+        </p>
+
+        <div class="project-highlight">
+            <strong>Important property:</strong>
+            the constraint mapping is derived from the fully known FDI filter dynamics
+            rather than the uncertain plant model. Its validity therefore does not
+            depend on having an accurate model of the plant.
+        </div>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Virtual-input constraint mapping<br>
+            <small>
+                Suggested: plot of \(\nu\), \(\nu_{\min}\), and \(\nu_{\max}\),
+                highlighting the instants when the physical input reaches its limits.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== CASE STUDY ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Three-Mass Case Study</h3>
+
+        <p>
+            The framework is evaluated on a serially connected
+            <strong>three-mass–spring–damper system</strong>. The control force is
+            applied to the first mass, disturbances can act on the individual masses,
+            and the position of the third mass is required to track a reference
+            trajectory.
+        </p>
+
+        <p>
+            The system has relative degree \(d=4\) and first nonzero Markov parameter
+            \(H_d=40\). The simulations examine command following, rejection of
+            unknown disturbances, actuator saturation, and the effect of the FDI
+            filter gain.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Three-mass–spring–damper system<br>
+            <small>
+                Suggested: the system schematic from the case study, preferably
+                redrawn for the website.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== RESULTS ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Disturbance Rejection &amp; Constraint Handling</h3>
+
+        <p>
+            Under unknown white-noise disturbances, increasing the FDI filter gain
+            improves tracking and brings the filtered controller closer to ideal
+            Dynamic Inversion behavior.
+        </p>
+
+        <p>
+            When actuator constraints are introduced, the mapped virtual-input bounds
+            allow MPC to prevent saturation. As the physical limits become tighter,
+            tracking performance decreases because less control authority is available,
+            while the commanded input remains inside the prescribed bounds.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Tracking performance under different actuator constraints<br>
+            <small>
+                Suggested: selected tracking/control-effort plots showing that
+                \(u\) remains inside its limits.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== DI COMPARISON ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Relation to Ideal Dynamic Inversion</h3>
+
+        <p>
+            As the FDI filter gain increases, the FDI virtual-input constraint bounds
+            approach those obtained from ideal DI. At the instants when the physical
+            actuator reaches its upper or lower limit, the corresponding FDI and DI
+            mapped bounds coincide.
+        </p>
+
+        <p>
+            The approximation quality is also evaluated using the discrepancy between
+            \(p^d y\) and \(\nu\). Higher filter gains initially improve the
+            linearization accuracy, although excessively large gains can introduce
+            discrete-time oscillations and instability. This exposes a practical
+            trade-off between filter gain, sampling rate, performance, and computational
+            requirements.
+        </p>
+
+    </section>
+
+
+    <!-- ==================== OBSERVER COMPARISON ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Comparison with DI–MPC + Disturbance Observer</h3>
+
+        <p>
+            The proposed controller is further compared with a conventional
+            <strong>DI–MPC architecture equipped with a Luenberger disturbance
+            observer</strong>. The observer-based approach explicitly estimates the
+            unknown disturbance before compensating for it through Dynamic Inversion.
+        </p>
+
+        <p>
+            This comparison highlights a central distinction between the two approaches:
+            DI–MPC with disturbance estimation relies on knowledge of the plant matrices
+            and state information, whereas FDI–MPC achieves disturbance rejection using
+            substantially less plant information and without explicitly reconstructing
+            the disturbance.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            FDI–MPC vs. DI–MPC with disturbance observer<br>
+            <small>
+                Suggested: side-by-side tracking and constrained control-effort
+                comparison.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== TAKEAWAYS ==================== -->
+    <section class="modal-project-section project-takeaways">
+
+        <h3>Key Contributions &amp; Takeaways</h3>
+
+        <ul>
+            <li>
+                A hybrid <strong>FDI–MPC framework</strong> combining robust
+                disturbance rejection with explicit actuator-constraint handling.
+            </li>
+
+            <li>
+                A <strong>dynamic constraint-mapping algorithm</strong> that transforms
+                physical actuator limits into feasible bounds on the MPC virtual input.
+            </li>
+
+            <li>
+                Control with <strong>limited plant information</strong>: only the
+                relative degree, first nonzero Markov parameter, and output measurements
+                are required by the FDI formulation.
+            </li>
+
+            <li>
+                Rejection of <strong>unknown and unmeasured disturbances</strong>
+                without requiring explicit disturbance estimation.
+            </li>
+
+            <li>
+                Analysis of the practical relationship between FDI gain, sampling time,
+                linearization accuracy, and ideal Dynamic Inversion behavior.
+            </li>
+        </ul>
+
+    </section>
+
+
+    <!-- ==================== PUBLICATION ==================== -->
+    <section class="modal-project-section project-publication">
+
+        <h3>Related Publication</h3>
+
+        <p>
+            <strong>Arash Rahmanidehkordi</strong> and Amirhossein Ghasemi,
+            “Filtered Dynamic Inversion for Input Constrained Uncertain Linear
+            Systems with Unknown and Unmeasured Disturbances.”
+        </p>
+
+        <p>
+            <em>International Journal of Dynamics and Control</em>, Vol. 14,
+            Article 286, 2026.<br>
+            DOI: 10.1007/s40435-026-02224-9
+        </p>
+
+    </section>
+
+</div>
