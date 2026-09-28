@@ -1,0 +1,376 @@
+<!-- =========================================================
+     PROJECT 3: HIERARCHICAL TRAFFIC FLOW CONTROL
+     DMV-ES + D-FFL for heterogeneous freeways
+========================================================== -->
+
+<div class="project-detail">
+
+    <!-- ==================== TITLE ==================== -->
+    <header class="modal-project-header">
+
+        <p class="modal-project-kicker">
+            Intelligent Transportation Systems · Traffic Control · Extremum Seeking · Nonlinear Control
+        </p>
+
+        <h2>Hierarchical Traffic Flow Control for Heterogeneous Freeways</h2>
+
+        <p class="modal-project-subtitle">
+            Distributed multivariable extremum seeking and filtered feedback
+            linearization for congestion management in mixed autonomous and
+            human-driven traffic.
+        </p>
+
+    </header>
+
+
+    <!-- ==================== OVERVIEW ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Overview</h3>
+
+        <p>
+            This project develops a <strong>two-level hierarchical control framework</strong>
+            for heterogeneous freeways where autonomous vehicles (AVs) and human-driven
+            vehicles (HVs) share the roadway. The objective is to increase traffic flow,
+            prevent congestion from propagating upstream, and regulate the densities of
+            both vehicle classes without relying on a detailed traffic model.
+        </p>
+
+        <p>
+            At the upper level, <strong>Distributed Multivariable Extremum Seeking
+            (DMV-ES)</strong> searches online for desirable AV and HV densities.
+            At the lower level, <strong>Distributed Filtered Feedback Linearization
+            (D-FFL)</strong> converts those density references into recommended vehicle
+            speeds while providing robustness to uncertain and unmeasured traffic dynamics.
+        </p>
+
+        <div class="project-highlight">
+            <strong>Main idea:</strong>
+            separate traffic optimization from density regulation:
+            DMV-ES determines <em>where the traffic densities should operate</em>,
+            while D-FFL determines <em>how vehicle speeds should be adjusted</em>
+            to reach those densities.
+        </div>
+
+    </section>
+
+
+    <!-- ==================== TRAFFIC MODEL ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Heterogeneous Traffic Model</h3>
+
+        <p>
+            The freeway is divided into cells and modeled using an enhanced
+            <strong>multi-class METANET</strong> formulation. Each cell contains
+            separate density and average-velocity states for AVs and HVs:
+        </p>
+
+        <div class="project-equation">
+            \[
+            x_{i,A}=
+            \begin{bmatrix}
+            \rho_{i,A} & v_{i,A}
+            \end{bmatrix}^{\top},
+            \qquad
+            x_{i,H}=
+            \begin{bmatrix}
+            \rho_{i,H} & v_{i,H}
+            \end{bmatrix}^{\top}.
+            \]
+        </div>
+
+        <p>
+            The density dynamics follow conservation of vehicles, while the velocity
+            dynamics include relaxation, convection, downstream density effects, and
+            disturbances. Unlike a conventional fixed-parameter model, the formulation
+            introduces <strong>state-dependent parameters</strong> and dynamic coupling
+            terms to better represent the interaction between the two vehicle classes.
+        </p>
+
+        <p>
+            The coupling is interpreted through dynamically allocated road-space fractions
+            \(\alpha_{i,A}\) and \(\alpha_{i,H}\), satisfying
+        </p>
+
+        <div class="project-equation">
+            \[
+            \alpha_{i,A}+\alpha_{i,H}=1.
+            \]
+        </div>
+
+        <p>
+            These fractions change according to the traffic regime—free flow,
+            semi-congested, or congested—and allow the achievable total traffic flow
+            to depend jointly on the densities of AVs and HVs.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Heterogeneous freeway and AV/HV traffic model<br>
+            <small>
+                Suggested: freeway-cell schematic together with the AV/HV
+                flow-density representation.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== ARCHITECTURE ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Hierarchical Control Architecture</h3>
+
+        <p>
+            Traffic management is formulated as a distributed hierarchy. Each controlled
+            region locally optimizes its traffic condition while accounting for interaction
+            with neighboring cells.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            DMV-ES + D-FFL hierarchical control architecture<br>
+            <small>
+                Upper level: density optimization. Lower level: density tracking
+                through recommended AV/HV speeds.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== DMV-ES ==================== -->
+    <section class="modal-project-section">
+
+        <h3>1. Distributed Multivariable Extremum Seeking</h3>
+
+        <p>
+            The upper-level controller determines the desired density pair
+            \(\rho_i^{*}=[\rho_{i,A}^{*},\rho_{i,H}^{*}]^{\top}\) for each controlled
+            cell without requiring an explicit analytical model of the traffic-flow
+            optimum.
+        </p>
+
+        <p>
+            The local objective balances two goals: maximizing the traffic flow in the
+            target cell and reducing large flow differences between neighboring cells:
+        </p>
+
+        <div class="project-equation">
+            \[
+            J_i
+            =
+            w_{i,1}Q_i^{2}
+            -
+            w_{i,2}\left(Q_i-Q_{i-1}\right)^{2}.
+            \]
+        </div>
+
+        <p>
+            Small periodic perturbations are applied independently to the AV and HV
+            density references. By filtering and demodulating the resulting objective
+            signal, DMV-ES estimates the local gradient and continuously updates the
+            density references toward the flow-maximizing operating point.
+        </p>
+
+        <div class="project-highlight">
+            <strong>Why multivariable ES?</strong>
+            AV and HV densities are coupled. Optimizing them jointly allows the
+            controller to account for how changing one vehicle class affects the
+            traffic conditions experienced by the other.
+        </div>
+
+    </section>
+
+
+    <!-- ==================== FFL ==================== -->
+    <section class="modal-project-section">
+
+        <h3>2. Distributed Filtered Feedback Linearization</h3>
+
+        <p>
+            The lower-level controller receives the desired densities from DMV-ES and
+            regulates the actual AV and HV densities by modifying the recommended
+            velocities communicated to the vehicles.
+        </p>
+
+        <p>
+            For each vehicle class, the relative degree between density and the local
+            speed-control command is two. The density dynamics can therefore be written
+            in the input-output form
+        </p>
+
+        <div class="project-equation">
+            \[
+            \ddot{\rho}
+            =
+            \Phi+\varphi u,
+            \]
+        </div>
+
+        <p>
+            Direct Feedback Linearization would require complete knowledge of the
+            nonlinear traffic dynamics and disturbances. D-FFL instead passes the ideal
+            inversion command through stable filter dynamics, producing an implementable
+            controller that requires substantially less model information and does not
+            require explicit knowledge of the unknown disturbances.
+        </p>
+
+    </section>
+
+
+    <!-- ==================== REAL HIGHWAY ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Case Study: I-485 Freeway, Charlotte</h3>
+
+        <p>
+            The framework is evaluated using traffic data from approximately
+            <strong>10 miles of I-485 in Charlotte, North Carolina</strong>, between
+            Mallard Creek Road and Harrisburg Road. The freeway is divided into ten
+            one-mile cells, with several cells experiencing congestion during the
+            selected peak-hour traffic period.
+        </p>
+
+        <p>
+            The METANET parameters are calibrated using a corresponding
+            <strong>PTV VISSIM</strong> traffic environment. The simulations also account
+            for different communication capabilities: AV speed recommendations are
+            updated substantially faster than the speed information communicated to
+            human-driven vehicles.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            I-485 test corridor and controlled cells<br>
+            <small>
+                Suggested: freeway map showing the ten-cell network and congested
+                target cells.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== RESULTS ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Congestion Management Results</h3>
+
+        <p>
+            Without active control, congestion propagates upstream and the densities in
+            the affected cells move toward more severe traffic conditions. With the
+            DMV-ES–D-FFL framework, the upper-level controller identifies improved
+            density references and the lower-level controller tracks them, preventing
+            the target cells from approaching jam conditions.
+        </p>
+
+        <p>
+            The resulting traffic flow increases across the controlled region while the
+            objective function improves. Compared with a distributed mainstream
+            traffic controller based on an adaptive PID scheme, the proposed framework
+            reaches the target densities more rapidly and dissipates congestion more
+            effectively.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Density and traffic-flow comparison<br>
+            <small>
+                Suggested: No-Control vs. DMV-ES–D-FFL density/flow results and
+                the comparison with the mainstream traffic controller.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== VISSIM ==================== -->
+    <section class="modal-project-section">
+
+        <h3>MATLAB–VISSIM Validation</h3>
+
+        <p>
+            A second study evaluates the controller using a direct
+            <strong>MATLAB–VISSIM co-simulation</strong>. Traffic densities generated
+            by the microscopic VISSIM simulation are transferred to MATLAB/Simulink,
+            where DMV-ES updates the desired AV/HV densities and D-FFL computes the
+            corresponding control commands. The recommended velocities are then sent
+            back to VISSIM.
+        </p>
+
+        <p>
+            The VISSIM scenario uses a mixed fleet of <strong>60% AVs and 40% HVs</strong>.
+            AVs receive speed information approximately three times more frequently than
+            HVs, representing the higher communication capability available to connected
+            autonomous vehicles. The co-simulation results again show lower densities in
+            congested cells and improved traffic flow relative to the uncontrolled case.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            MATLAB–VISSIM co-simulation and experimental results<br>
+            <small>
+                Suggested: simulation-platform flowchart together with the VISSIM
+                density comparison.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== TAKEAWAYS ==================== -->
+    <section class="modal-project-section project-takeaways">
+
+        <h3>Key Contributions &amp; Takeaways</h3>
+
+        <ul>
+            <li>
+                An enhanced <strong>multi-class METANET model</strong> with
+                state-dependent parameters and dynamic AV/HV coupling.
+            </li>
+
+            <li>
+                A two-level distributed architecture combining
+                <strong>model-free density optimization</strong> through DMV-ES with
+                robust nonlinear density regulation through D-FFL.
+            </li>
+
+            <li>
+                Explicit consideration of <strong>AV–HV interactions</strong> and
+                different communication rates between infrastructure and the two
+                vehicle classes.
+            </li>
+
+            <li>
+                Validation using both macroscopic traffic simulations and a direct
+                <strong>MATLAB–PTV VISSIM</strong> co-simulation based on a real
+                I-485 freeway corridor.
+            </li>
+        </ul>
+
+    </section>
+
+
+    <!-- ==================== PUBLICATION ==================== -->
+    <section class="modal-project-section project-publication">
+
+        <h3>Related Publication</h3>
+
+        <p>
+            Pouria Karimi Shahri, <strong>Arash Rahmanidehkordi</strong>,
+            Azad Ghaffari, and Amir H. Ghasemi,
+            “Enhancing Traffic Flow in Heterogeneous Freeways:
+            Integration of Multivariable Extremum Seeking and Filtered Feedback
+            Linearization Control.”
+        </p>
+
+        <p>
+            <em>IEEE Access</em>, Vol. 13, 2025.
+            DOI: 10.1109/ACCESS.2025.3585431
+        </p>
+
+    </section>
+
+</div>
