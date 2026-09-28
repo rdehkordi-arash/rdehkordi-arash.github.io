@@ -1,0 +1,455 @@
+<!-- =========================================================
+     PROJECT 2: FILTERED FEEDBACK LINEARIZATION + MPC
+     Project fragment loaded into the common modal.
+========================================================== -->
+
+<div class="project-detail">
+
+    <!-- ==================== TITLE ==================== -->
+    <header class="modal-project-header">
+
+        <p class="modal-project-kicker">
+            Nonlinear Control · Robust Control · Model Predictive Control · Constraint Mapping
+        </p>
+
+        <h2>Constrained Nonlinear Control via Filtered Feedback Linearization and MPC</h2>
+
+        <p class="modal-project-subtitle">
+            A robust control framework for nonlinear MIMO systems subject to unknown,
+            unmeasured disturbances and actuator constraints.
+        </p>
+
+    </header>
+
+
+    <!-- ==================== OVERVIEW ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Overview</h3>
+
+        <p>
+            This project develops a hybrid <strong>Filtered Feedback Linearization–Model
+            Predictive Control (FFL–MPC)</strong> framework for control-affine nonlinear
+            systems affected by unknown and unmeasured disturbances. The objective is to
+            retain the disturbance-rejection capability of filtered inversion while also
+            satisfying prescribed actuator limits.
+        </p>
+
+        <p>
+            The key difficulty is that FFL generates the actual control command through
+            low-pass filter dynamics, whereas MPC optimizes a <strong>virtual input</strong>.
+            The project therefore develops a dynamic constraint-mapping method that
+            transforms bounds on the physical input—and, when required, its derivatives—
+            into admissible constraints on the MPC virtual input.
+        </p>
+
+        <div class="project-highlight">
+            <strong>Main idea:</strong>
+            use FFL to remove the explicit dependence of the controller on unknown
+            disturbances, use MPC to determine the virtual input, and use the dynamics
+            of the FFL filter to map actuator constraints into time-varying feasible
+            bounds for the MPC.
+        </div>
+
+    </section>
+
+
+    <!-- ==================== PROBLEM ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Nonlinear System &amp; Control Challenge</h3>
+
+        <p>
+            Consider a control-affine nonlinear MIMO system
+        </p>
+
+        <div class="project-equation">
+            \[
+            \dot{x}=f(x)+G(x)u+D(x)w,
+            \qquad
+            y=h(x),
+            \]
+        </div>
+
+        <p>
+            where \(u\) is the physical control input and \(w\) represents unknown,
+            unmeasured disturbances. After differentiating each output according to its
+            relative degree, the input-output dynamics can be written compactly as
+        </p>
+
+        <div class="project-equation">
+            \[
+            y^{(r)}
+            =
+            \Lambda(x)+\Gamma(x)u+\Phi(x,\zeta_w).
+            \]
+        </div>
+
+        <p>
+            Standard Feedback Linearization would require the disturbance-dependent term
+            \(\Phi(x,\zeta_w)\), which is unavailable in practice. In addition, a
+            conventional FL virtual-input law does not directly account for actuator
+            constraints. The proposed architecture addresses these two issues separately
+            but within a unified controller.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Proposed FFL–MPC control architecture<br>
+            <small>
+                Suggested: reference → MPC → virtual input \(\nu\) → FFL/filter dynamics
+                → physical input \(u\) → nonlinear plant.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== FFL ==================== -->
+    <section class="modal-project-section">
+
+        <h3>1. Filtered Feedback Linearization</h3>
+
+        <p>
+            In FFL, the ideal Feedback Linearization command \(u^{*}\) is passed through
+            a stable low-pass filter,
+        </p>
+
+        <div class="project-equation">
+            \[
+            \eta_z(p)u=\eta_z(0)u^{*},
+            \]
+        </div>
+
+        <p>
+            where \(z\) is a filter-design parameter. By combining the filter dynamics
+            with the nonlinear input-output relation, the implementable FFL command can
+            be expressed as
+        </p>
+
+        <div class="project-equation">
+            \[
+            [\,\eta_z(p)-\eta_z(0)\,]u
+            =
+            \eta_z(0)\Gamma^{-1}(x)
+            \left[\nu-y^{(r)}\right].
+            \]
+        </div>
+
+        <p>
+            Importantly, the unknown disturbance term \(\Phi(x,\zeta_w)\) and the
+            nonlinear drift term \(\Lambda(x)\) no longer appear explicitly in this
+            expression. The controller instead requires the relative-degree information,
+            the dynamic-inversion matrix \(\Gamma(x)\), and output derivatives.
+            This provides the robustness advantage of the filtered formulation while
+            reducing the model information needed for implementation.
+        </p>
+
+        <p>
+            For sufficiently large filter gain \(z\), the residual effect of the filter
+            dynamics becomes small and the input-output behavior approaches
+            \(y_i^{(r_i)}\approx\nu_i\). This simple relationship is used as the prediction
+            model for MPC.
+        </p>
+
+    </section>
+
+
+    <!-- ==================== MPC ==================== -->
+    <section class="modal-project-section">
+
+        <h3>2. Model Predictive Control</h3>
+
+        <p>
+            Each controlled output is represented inside the MPC by an integrator chain
+            corresponding to its relative degree. The resulting prediction model is
+            independent of the complete nonlinear plant model:
+        </p>
+
+        <div class="project-equation">
+            \[
+            x_{\mathrm{mpc}}(k+1)
+            =
+            \bar{A}_{\mathrm{mpc}}x_{\mathrm{mpc}}(k)
+            +
+            \bar{B}_{\mathrm{mpc}}\nu(k),
+            \qquad
+            y_{\mathrm{mpc}}(k)
+            =
+            \bar{C}_{\mathrm{mpc}}x_{\mathrm{mpc}}(k).
+            \]
+        </div>
+
+        <p>
+            MPC then selects the virtual command \(\nu\) by minimizing a tracking and
+            control-effort objective over the prediction horizon. However, the actuator
+            limits apply to \(u\), not directly to \(\nu\). This motivates the central
+            contribution of the project: <strong>dynamic constraint mapping</strong>.
+        </p>
+
+    </section>
+
+
+    <!-- ==================== MAPPING ==================== -->
+    <section class="modal-project-section">
+
+        <h3>3. Dynamic Constraint Mapping</h3>
+
+        <p>
+            The FFL filter is treated as a dynamic system by defining an
+            <strong>input-dynamics state</strong> containing the physical input and its
+            derivatives:
+        </p>
+
+        <div class="project-equation">
+            \[
+            U
+            =
+            \begin{bmatrix}
+            u^{\top} &
+            (pu)^{\top} &
+            \cdots &
+            (p^{\rho-1}u)^{\top}
+            \end{bmatrix}^{\top}.
+            \]
+        </div>
+
+        <p>
+            The filter dynamics can then be represented in discrete time as
+        </p>
+
+        <div class="project-equation">
+            \[
+            U(k+1)
+            =
+            A_{ud}U(k)
+            +
+            B_{ud}
+            \left[-y^{(r)}(k)+\nu(k)\right].
+            \]
+        </div>
+
+        <p>
+            Because the relative degree between \(\nu\) and each component of \(U\) is
+            known, prescribed bounds on \(u\), \(pu\), ..., \(p^{\rho-1}u\) can be
+            propagated through these dynamics and rewritten as linear inequalities on
+            the virtual input. The overall admissible virtual-input set is the
+            intersection of the feasible sets generated by the imposed physical bounds:
+        </p>
+
+        <div class="project-equation">
+            \[
+            \mathcal{V}(k)
+            =
+            \bigcap_{i=1}^{\rho}\mathcal{V}_i(k).
+            \]
+        </div>
+
+        <div class="project-highlight">
+            <strong>Why this matters:</strong>
+            the physical actuator limits may be constant, but their equivalent bounds
+            in the virtual-input space are generally <strong>time-varying</strong>.
+            MPC therefore operates inside a feasible region that evolves with the FFL
+            input dynamics.
+        </div>
+
+    </section>
+
+
+    <!-- ==================== CASE STUDY ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Case Study: Three Coupled Pendulums</h3>
+
+        <p>
+            The framework is evaluated on a nonlinear MIMO system consisting of
+            <strong>three pendulums interconnected by springs</strong>. Control torques
+            are applied to the first and third pendulums, while independent unknown
+            disturbance torques act on all three pendulums. The controlled outputs are
+            the angular positions of the first and third pendulums.
+        </p>
+
+        <p>
+            Both outputs have relative degree \(r_1=r_2=2\). The simulations use a
+            sampling time of \(T_s=1\) ms and the second-order filter
+            \(\eta_z(s)=(s+z)^2\). The reference trajectories contain multiple sinusoidal
+            components, while the system is subjected to independent zero-mean Gaussian
+            disturbances.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Three spring-coupled pendulum system<br>
+            <small>
+                Suggested: three pendulums, springs, control torques \(u_1,u_2\),
+                and disturbance torques \(w_1,w_2,w_3\).
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== RESULTS 1 ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Disturbance Rejection &amp; Filter Gain</h3>
+
+        <p>
+            The first numerical example investigates disturbance rejection without
+            imposing actuator constraints. Three filter gains,
+            \(z=25\), \(50\), and \(100\), are compared. Increasing the filter gain
+            progressively improves the approximation of the ideal input-output dynamics
+            and therefore improves tracking performance.
+        </p>
+
+        <div class="result-summary-grid">
+
+            <div class="result-summary-card">
+                <span class="result-number">z = 25</span>
+                <span class="result-label">Noticeable tracking error</span>
+            </div>
+
+            <div class="result-summary-card">
+                <span class="result-number">z = 50</span>
+                <span class="result-label">Improved tracking</span>
+            </div>
+
+            <div class="result-summary-card">
+                <span class="result-number">z = 100</span>
+                <span class="result-label">Best disturbance rejection</span>
+            </div>
+
+        </div>
+
+        <p>
+            At \(z=100\), the outputs track the reference trajectories closely despite
+            the external disturbances, while the control inputs exhibit smaller
+            fluctuations than for the lower filter gains.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Tracking and control effort for \(z=25,\;50,\;100\)<br>
+            <small>Suggested: the three filter-gain cases from the disturbance-rejection study.</small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== RESULTS 2 ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Input-Constrained Control</h3>
+
+        <p>
+            The second example evaluates the constraint-mapping algorithm using
+            \(z=100\) and actuator limits
+            \(-4.25\leq u_1\leq4.25\) and
+            \(-4.25\leq u_2\leq4.25\) N·m. Without constraint mapping, the same
+            controller can demand inputs beyond these limits. With the proposed mapping,
+            both physical control inputs remain within the prescribed bounds throughout
+            the simulation.
+        </p>
+
+        <p>
+            When an actuator reaches its boundary, the corresponding virtual input
+            simultaneously reaches its mapped boundary. Temporary tracking degradation
+            occurs during these intervals because perfect tracking would require control
+            effort beyond the available actuator range. Once the required effort returns
+            to the feasible range, tracking recovers.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            Tracking, physical-input constraints, and mapped virtual-input bounds<br>
+            <small>
+                Suggested: \(u_1,\nu_1\) and \(u_2,\nu_2\) with enlarged views of
+                boundary-contact intervals.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== GEOMETRIC VIEW ==================== -->
+    <section class="modal-project-section">
+
+        <h3>Geometric Interpretation</h3>
+
+        <p>
+            The constraint mapping can also be visualized geometrically. The actuator
+            constraints define a <strong>constant feasible region</strong> in the
+            \((u_1,u_2)\) space. In contrast, the corresponding feasible region in the
+            \((\nu_1,\nu_2)\) space changes continuously with time as it is generated
+            from the input dynamics.
+        </p>
+
+        <p>
+            The physical and virtual trajectories remain inside their respective feasible
+            regions. When the actual input reaches a boundary—or an edge formed by two
+            simultaneous actuator limits—the virtual-input trajectory reaches the
+            corresponding boundary of its mapped feasible region at the same instant.
+        </p>
+
+        <div class="project-figure-placeholder">
+            <strong>FIGURE PLACEHOLDER</strong><br>
+            3D feasible regions in physical and virtual input spaces<br>
+            <small>
+                Suggested: constant \(u\)-space corridor beside the time-varying
+                \(\nu\)-space corridor.
+            </small>
+        </div>
+
+    </section>
+
+
+    <!-- ==================== TAKEAWAYS ==================== -->
+    <section class="modal-project-section project-takeaways">
+
+        <h3>Key Contributions &amp; Takeaways</h3>
+
+        <ul>
+            <li>
+                A hybrid <strong>FFL–MPC architecture</strong> for nonlinear MIMO systems
+                with unknown disturbances and actuator constraints.
+            </li>
+
+            <li>
+                FFL removes the explicit dependence of the implementable controller on
+                the unknown disturbance term and nonlinear drift dynamics.
+            </li>
+
+            <li>
+                A <strong>dynamic constraint-mapping algorithm</strong> converts bounds
+                on the actual control input and its derivatives into feasible constraints
+                on the MPC virtual input.
+            </li>
+
+            <li>
+                The numerical study demonstrates robust tracking under disturbances and
+                successful enforcement of actuator limits, including intervals where the
+                unconstrained controller would exceed the admissible range.
+            </li>
+        </ul>
+
+    </section>
+
+
+    <!-- ==================== PAPER ==================== -->
+    <section class="modal-project-section project-publication">
+
+        <h3>Related Manuscript</h3>
+
+        <p>
+            <strong>Arash Rahmanidehkordi</strong> and Amirhossein Ghasemi,
+            “Input Constrained Filtered Feedback Linearization for Control–Affine
+            Nonlinear Systems Subjected to Unknown Disturbance.”
+        </p>
+
+        <p>
+            <em>Manuscript in preparation.</em>
+        </p>
+
+    </section>
+
+</div>
