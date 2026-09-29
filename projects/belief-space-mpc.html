@@ -1,0 +1,258 @@
+<div class="project-detail">
+
+<header class="modal-project-header">
+    <p class="modal-project-kicker">
+        State &amp; Parameter Estimation · Kalman Filtering · Adaptive MPC · Belief-Space Control
+    </p>
+    <h2>Learning-Based Control via Kalman Filtering and Belief-Space MPC</h2>
+    <p class="modal-project-subtitle">
+        Online parameter estimation and uncertainty-aware predictive control
+        for systems with uncertain dynamics.
+    </p>
+</header>
+
+<section class="modal-project-section">
+    <h3>Overview</h3>
+    <p>
+        This project investigates how <strong>online system identification</strong>
+        can be integrated directly with Model Predictive Control (MPC). Rather than
+        assuming that the plant model is perfectly known, uncertain model parameters
+        are estimated recursively using a <strong>Kalman Filter (KF)</strong>, and
+        the prediction model used by the controller is updated as new information
+        becomes available.
+    </p>
+    <p>
+        The framework is developed progressively in three stages. First, the KF is
+        used as a parameter estimator. Next, the estimated parameters are used to update
+        the MPC model online. Finally, estimator uncertainty itself is incorporated into
+        the optimization problem, leading to <strong>Belief-Space MPC</strong>, where
+        the controller considers both control performance and future uncertainty.
+    </p>
+    <div class="project-highlight">
+        <strong>Main idea:</strong>
+        the controller should not only use what has already been learned about the
+        system; its control actions can also influence what will be learned from
+        future measurements.
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>Uncertain System &amp; Parameter Estimation</h3>
+    <p>
+        Consider a dynamical system whose behavior depends on an uncertain parameter
+        vector \(\theta\). The unknown parameters are incorporated into the estimation
+        problem as additional states. A slowly varying parameter model can be written as
+    </p>
+    <div class="project-equation">
+        \[
+        \theta_{k+1}=\theta_k+w_{\theta,k}.
+        \]
+    </div>
+    <p>
+        At every sampling instant, the Kalman Filter combines model predictions with
+        measurements and produces
+    </p>
+    <div class="project-equation">
+        \[
+        \hat{\theta}_{k|k},\qquad P_{k|k}.
+        \]
+    </div>
+    <p>
+        The vector \(\hat{\theta}_{k|k}\) represents the current parameter estimate,
+        while \(P_{k|k}\) quantifies the remaining uncertainty. The estimator therefore
+        provides both a model estimate and a measure of <strong>confidence in that
+        estimate</strong>.
+    </p>
+</section>
+
+<section class="modal-project-section">
+    <h3>Stage 1 — Kalman Filter for Online Parameter Identification</h3>
+    <p>
+        The first stage focuses on estimation. Measurements from the physical system are
+        processed recursively through the prediction–correction structure of the
+        Kalman Filter.
+    </p>
+    <p>
+        The <strong>prediction step</strong> generates a prior parameter estimate and
+        covariance. The <strong>correction step</strong> then incorporates the new
+        measurement to produce the posterior estimate and covariance.
+    </p>
+    <div class="project-equation">
+        \[
+        \text{Prior belief}
+        \longrightarrow
+        \text{Measurement update}
+        \longrightarrow
+        (\hat{\theta}_{k|k},P_{k|k}).
+        \]
+    </div>
+    <p>
+        At this stage, estimation and control remain largely separated: the estimator
+        learns the uncertain dynamics, but parameter uncertainty does not yet influence
+        how the controller selects its input.
+    </p>
+</section>
+
+<section class="modal-project-section">
+    <h3>Stage 2 — Adaptive Model Predictive Control</h3>
+    <p>
+        In the second stage, the estimated parameters update the MPC prediction model.
+        For example, if the system matrix depends on the uncertain parameters,
+    </p>
+    <div class="project-equation">
+        \[
+        A_k=A\!\left(\hat{\theta}_{k|k}\right),
+        \]
+    </div>
+    <p>
+        with the same principle applying to \(B_k\), \(C_k\), or other model components
+        when they depend on \(\theta\). The controller therefore operates with an
+        evolving model rather than a fixed nominal model.
+    </p>
+    <p>
+        This improves prediction as the parameter estimates converge. However, the
+        controller still optimizes primarily using the current best estimate.
+        The covariance \(P_k\) is available from the estimator but does not yet directly
+        influence the MPC objective.
+    </p>
+    <div class="project-highlight">
+        <strong>Key distinction:</strong>
+        updating MPC with \(\hat{\theta}_k\) creates an
+        <strong>adaptive MPC</strong>. To obtain a belief-space controller, the
+        uncertainty \(P_k\) must also become part of the predictive optimization.
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>Stage 3 — Belief-Space Model Predictive Control</h3>
+    <p>
+        The final stage augments conventional MPC with the evolution of estimator
+        uncertainty. The controller predicts not only the future physical states, but
+        also the future <strong>belief</strong> about the uncertain parameters:
+    </p>
+    <div class="project-equation">
+        \[
+        b_k=\left(\hat{\theta}_{k|k},P_{k|k}\right).
+        \]
+    </div>
+    <p>
+        Over the prediction horizon, candidate control sequences generate future state
+        trajectories and corresponding covariance trajectories \(P_{k+i|k}\).
+        Since future measurements depend on the trajectory of the system, different
+        control actions can lead to different levels of information about the uncertain
+        parameters.
+    </p>
+    <p>The MPC objective can therefore include an uncertainty penalty:</p>
+    <div class="project-equation">
+        \[
+        J=
+        J_{\mathrm{tracking}}
+        +J_{\Delta u}
+        +J_u
+        +\lambda J_{\mathrm{uncertainty}}.
+        \]
+    </div>
+    <p>For example, uncertainty can be quantified through</p>
+    <div class="project-equation">
+        \[
+        J_{\mathrm{uncertainty}}
+        =
+        \sum_{i=1}^{N_p}\operatorname{tr}(P_{k+i|k}),
+        \]
+    </div>
+    <p>
+        or through an information-volume criterion based on
+        \(\log\det(P_{k+i|k})\). The weighting parameter \(\lambda\) controls the
+        trade-off between conventional control objectives and uncertainty reduction.
+    </p>
+</section>
+
+<section class="modal-project-section">
+    <h3>Control vs. Learning</h3>
+    <p>
+        This formulation introduces an important interaction between
+        <strong>control</strong> and <strong>learning</strong>. A control action that
+        gives the best immediate tracking performance may not necessarily generate
+        measurements that are informative about the uncertain parameters.
+    </p>
+    <p>
+        Conversely, another input may excite the system in a way that reduces parameter
+        uncertainty, improving the model and potentially improving control performance
+        later in the prediction horizon.
+    </p>
+    <div class="project-highlight">
+        <strong>Control objective:</strong>
+        regulate the physical system while balancing <strong>exploitation</strong> of
+        the current model with <strong>information gathering</strong> for improved
+        future predictions.
+    </div>
+</section>
+
+<section class="modal-project-section">
+    <h3>Implementation Framework</h3>
+    <p>
+        At each sampling instant, the estimator processes the latest measurements and
+        updates both the parameter estimate and covariance. The physical prediction
+        model is reconstructed using \(\hat{\theta}_{k|k}\).
+    </p>
+    <p>
+        The MPC optimization then propagates the predicted physical dynamics together
+        with the covariance dynamics over the prediction horizon. The optimized input
+        sequence reflects both expected control performance and the evolution of model
+        uncertainty. Only the first optimized input is applied, and the complete
+        estimation and optimization procedure is repeated at the next sampling instant.
+    </p>
+    <div class="project-equation">
+        \[
+        \text{Measure}
+        \rightarrow
+        \text{Estimate }(\hat{\theta},P)
+        \rightarrow
+        \text{Update Model}
+        \rightarrow
+        \text{Predict Belief}
+        \rightarrow
+        \text{Optimize}
+        \rightarrow
+        \text{Apply }u.
+        \]
+    </div>
+</section>
+
+<section class="modal-project-section project-takeaways">
+    <h3>Key Objectives &amp; Takeaways</h3>
+    <ul>
+        <li>
+            Recursive <strong>online parameter identification</strong> using a Kalman
+            Filter rather than relying on a fixed nominal model.
+        </li>
+        <li>
+            Online reconstruction of the MPC prediction model using the latest parameter
+            estimates, providing an <strong>adaptive MPC</strong> architecture.
+        </li>
+        <li>
+            Explicit propagation of estimator covariance over the MPC prediction horizon
+            to represent future <strong>parameter uncertainty</strong>.
+        </li>
+        <li>
+            Integration of uncertainty measures such as \(\operatorname{tr}(P)\) or
+            \(\log\det(P)\) into the objective, producing an
+            <strong>uncertainty-aware / belief-space controller</strong>.
+        </li>
+        <li>
+            Investigation of the trade-off between immediate control performance and
+            control actions that improve the quality of future model estimates.
+        </li>
+    </ul>
+</section>
+
+<section class="modal-project-section project-publication">
+    <h3>Research Direction</h3>
+    <p>
+        <strong>Ongoing research project</strong> on learning-based and
+        uncertainty-aware predictive control, with emphasis on combining recursive
+        parameter estimation, adaptive model updates, and Belief-Space MPC.
+    </p>
+</section>
+
+</div>
