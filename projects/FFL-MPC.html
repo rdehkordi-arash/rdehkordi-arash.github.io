@@ -93,14 +93,6 @@
             but within a unified controller.
         </p>
 
-        <div class="project-figure-placeholder">
-            <strong>FIGURE PLACEHOLDER</strong><br>
-            Proposed FFL–MPC control architecture<br>
-            <small>
-                Suggested: reference → MPC → virtual input \(\nu\) → FFL/filter dynamics
-                → physical input \(u\) → nonlinear plant.
-            </small>
-        </div>
 
     </section>
 
@@ -277,14 +269,6 @@
             disturbances.
         </p>
 
-        <div class="project-figure-placeholder">
-            <strong>FIGURE PLACEHOLDER</strong><br>
-            Three spring-coupled pendulum system<br>
-            <small>
-                Suggested: three pendulums, springs, control torques \(u_1,u_2\),
-                and disturbance torques \(w_1,w_2,w_3\).
-            </small>
-        </div>
 
     </section>
 
@@ -327,11 +311,19 @@
             fluctuations than for the lower filter gains.
         </p>
 
-        <div class="project-figure-placeholder">
-            <strong>FIGURE PLACEHOLDER</strong><br>
-            Tracking and control effort for \(z=25,\;50,\;100\)<br>
-            <small>Suggested: the three filter-gain cases from the disturbance-rejection study.</small>
-        </div>
+           <!-- ==================================================================================
+                                              ### FIGURE ###
+          ================================================================================== -->
+              
+          <figure class="project-figure">
+              <img src="projects/Project_Images/FFL-MPC-No-Constraints.png"
+                   alt="No_Constraints_Fig">
+          
+              <figcaption>
+                  Gaussian Process (GP) integrated Feedback Linearization - MPC Structure.
+              </figcaption>
+          </figure>
+         
 
     </section>
 
@@ -370,6 +362,15 @@
 
     </section>
 
+     <figure class="project-figure">
+         <img src="projects/Project_Images/FFL-MPC-Constraint-Map.png"
+              alt="Input_Constraints_Fig">
+     
+         <figcaption>
+             Gaussian Process (GP) integrated Feedback Linearization - MPC Structure.
+         </figcaption>
+     </figure>
+
 
     <!-- ==================== GEOMETRIC VIEW ==================== -->
     <section class="modal-project-section">
@@ -391,14 +392,6 @@
             corresponding boundary of its mapped feasible region at the same instant.
         </p>
 
-        <div class="project-figure-placeholder">
-            <strong>FIGURE PLACEHOLDER</strong><br>
-            3D feasible regions in physical and virtual input spaces<br>
-            <small>
-                Suggested: constant \(u\)-space corridor beside the time-varying
-                \(\nu\)-space corridor.
-            </small>
-        </div>
 
     </section>
 
