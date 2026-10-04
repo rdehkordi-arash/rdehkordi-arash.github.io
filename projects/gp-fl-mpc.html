@@ -10,6 +10,23 @@
 <p>Feedback linearization provides a powerful way to transform nonlinear system dynamics into an equivalent linear form, but its effectiveness depends strongly on accurate knowledge of the nonlinear model. Gaussian Processes (GPs) provide a data-driven alternative by learning the unknown nonlinear dynamics while also quantifying uncertainty associated with the learned model.</p>
 <p>This project extends the GP-based feedback linearization framework by integrating the approximately linearized system with <strong>Model Predictive Control (MPC)</strong>. The proposed architecture addresses two practical issues: <strong>physical actuator constraints</strong> and the <strong>residual uncertainty</strong> resulting from imperfect GP-based feedback linearization.</p>
 <div class="project-highlight"><strong>Main idea:</strong> use GP posterior means to construct the feedback-linearizing controller, map physical actuator limits into admissible bounds on the MPC virtual input, and use GP posterior uncertainty to quantify the mismatch between the nominal linear MPC model and the actual approximately linearized system.</div>
+
+
+<!-- ==================================================================================
+                                    ### FIGURE ###
+================================================================================== -->
+    
+<figure class="project-figure">
+    <img src="projects/Project_Images/Comprehensive FL-GP-MPC.png"
+         alt="Belief_Space_Fig">
+
+    <figcaption>
+        Belief Space MPC Structure.
+    </figcaption>
+</figure>
+
+
+  
 </section>
 
 <section class="modal-project-section">
