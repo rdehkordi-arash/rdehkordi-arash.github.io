@@ -1,0 +1,124 @@
+<div class="project-detail">
+<header class="modal-project-header">
+<p class="modal-project-kicker">Nonlinear Control · Gaussian Processes · Feedback Linearization · Model Predictive Control</p>
+<h2>Constraint-Aware Gaussian-Process Feedback Linearization with MPC</h2>
+<p class="modal-project-subtitle">Extending GP-based feedback linearization with actuator-constraint handling and an explicit characterization of the residual uncertainty caused by imperfect feedback linearization.</p>
+</header>
+
+<section class="modal-project-section">
+<h3>Overview</h3>
+<p>Feedback linearization provides a powerful way to transform nonlinear system dynamics into an equivalent linear form, but its effectiveness depends strongly on accurate knowledge of the nonlinear model. Gaussian Processes (GPs) provide a data-driven alternative by learning the unknown nonlinear dynamics while also quantifying uncertainty associated with the learned model.</p>
+<p>This project extends the GP-based feedback linearization framework by integrating the approximately linearized system with <strong>Model Predictive Control (MPC)</strong>. The proposed architecture addresses two practical issues: <strong>physical actuator constraints</strong> and the <strong>residual uncertainty</strong> resulting from imperfect GP-based feedback linearization.</p>
+<div class="project-highlight"><strong>Main idea:</strong> use GP posterior means to construct the feedback-linearizing controller, map physical actuator limits into admissible bounds on the MPC virtual input, and use GP posterior uncertainty to quantify the mismatch between the nominal linear MPC model and the actual approximately linearized system.</div>
+</section>
+
+<section class="modal-project-section">
+<h3>GP-Based Feedback Linearization</h3>
+<p>Consider a full-state linearizable SISO nonlinear system in controllable canonical form, with unknown drift and input-gain functions:</p>
+<div class="project-equation">\[
+\dot{x}_1=x_2,\quad \dot{x}_2=x_3,\quad \ldots,\quad \dot{x}_n=f(x)+g(x)u.
+\]</div>
+<p>The unknown functions \(f(x)\) and \(g(x)\) are modeled using Gaussian Processes. Their posterior means provide the model estimates</p>
+<div class="project-equation">\[
+\hat f(x)=\mu_f(x),\qquad \hat g(x)=\mu_g(x),
+\]</div>
+<p>while \(\sigma_f(x)\) and \(\sigma_g(x)\) quantify the corresponding posterior uncertainty. Following the GP feedback-linearization framework, the physical control input is</p>
+<div class="project-equation">\[
+u=\frac{1}{\hat g(x)}\left[-\hat f(x)+\nu\right],
+\]</div>
+<p>where \(\nu\) is the virtual input of the approximately linearized system. Instead of generating \(\nu\) through a conventional linear feedback law, this project uses a linear MPC so that constraints can be explicitly incorporated into the control design.</p>
+</section>
+
+<section class="modal-project-section">
+<h3>Approximately Linearized Dynamics</h3>
+<p>If the GP estimates were exact, feedback linearization would completely cancel the nonlinear dynamics. With imperfect estimates, however, a residual modeling error remains. The resulting dynamics can be expressed as</p>
+<div class="project-equation">\[
+\dot{x}=Ax+B\nu+B d_{\mathrm{GP}},
+\]</div>
+<p>where</p>
+<div class="project-equation">\[
+d_{\mathrm{GP}}
+=
+f-\frac{g}{\hat g}\hat f
++
+\left(\frac{g}{\hat g}-1\right)\nu.
+\]</div>
+<p>For perfect estimates, \(\hat f=f\) and \(\hat g=g\), so \(d_{\mathrm{GP}}=0\). After discretization, the nominal prediction model used by the linear MPC is</p>
+<div class="project-equation">\[
+x_{k+1}=A_d x_k+B_d\nu_k,
+\]</div>
+<p>whereas the actual approximately linearized dynamics contain the additional effect of \(d_{\mathrm{GP},k}\). This term represents the discrepancy between the ideal linear model assumed by MPC and the behavior produced by imperfect GP-based feedback linearization.</p>
+</section>
+
+<section class="modal-project-section">
+<h3>Actuator Constraint Mapping</h3>
+<p>A key challenge is that MPC optimizes the virtual input \(\nu\), while the physical actuator is constrained in terms of the actual input \(u\):</p>
+<div class="project-equation">\[
+u_{\min}\leq u\leq u_{\max}.
+\]</div>
+<p>Rearranging the GP feedback-linearization control law gives</p>
+<div class="project-equation">\[
+\nu=\hat f(x)+\hat g(x)u.
+\]</div>
+<p>For \(\hat g(x)>0\), the physical actuator limits can therefore be mapped directly into state-dependent bounds on the virtual input:</p>
+<div class="project-equation">\[
+\hat f(x)+\hat g(x)u_{\min}
+\leq \nu \leq
+\hat f(x)+\hat g(x)u_{\max}.
+\]</div>
+<p>These admissible bounds are updated using the current GP estimates and supplied to the linear MPC. Importantly, imperfect GP estimates affect the quality of feedback linearization, but do not invalidate the algebraic actuator-bound mapping for the implemented control law.</p>
+<div class="project-highlight"><strong>Constraint-aware MPC:</strong> the physical actuator constraint is converted into an admissible interval for the virtual input optimized by the linear MPC.</div>
+</section>
+
+<section class="modal-project-section">
+<h3>GP Uncertainty &amp; Residual Linearization Error</h3>
+<p>The second part of the project uses the uncertainty information provided by Gaussian Processes to characterize the error remaining after approximate feedback linearization.</p>
+<p>Defining \(\Delta f=f-\hat f\) and \(\Delta g=g-\hat g\), the residual error can be expressed compactly as</p>
+<div class="project-equation">\[
+d_{\mathrm{GP}}=\Delta f+u\,\Delta g.
+\]</div>
+<p>Using three posterior standard-deviation intervals,</p>
+<div class="project-equation">\[
+-3\sigma_f(x)\leq\Delta f\leq3\sigma_f(x),
+\qquad
+-3\sigma_g(x)\leq\Delta g\leq3\sigma_g(x),
+\]</div>
+<p>together with the actuator bounds, a conservative symmetric uncertainty bound is</p>
+<div class="project-equation">\[
+|d_{\mathrm{GP}}|
+\leq
+3\sigma_f(x)+3\sigma_g(x)u_{\mathrm{abs}},
+\qquad
+u_{\mathrm{abs}}=\max\{|u_{\min}|,|u_{\max}|\}.
+\]</div>
+<p>This creates a direct connection between <strong>GP posterior uncertainty</strong> and the uncertainty affecting the nominal linear prediction model used by MPC. Regions with greater GP uncertainty consequently correspond to a larger possible discrepancy from ideal feedback-linearized behavior.</p>
+</section>
+
+<section class="modal-project-section">
+<h3>Toward Robust GP–FL–MPC</h3>
+<p>The uncertainty characterization allows the approximately linearized dynamics to be viewed as a nominal linear system subject to a bounded residual term:</p>
+<div class="project-equation">\[
+x_{k+1}=A_d x_k+B_d\nu_k+B_d d_{\mathrm{GP},k}.
+\]</div>
+<p>This representation provides a basis for incorporating learned GP uncertainty into <strong>robust prediction</strong>, <strong>constraint tightening</strong>, or performance analysis. Since GP uncertainty is state dependent, a rigorous multi-step robust formulation requires either a uniform uncertainty bound over the relevant operating region or propagation of the state-dependent uncertainty throughout the MPC prediction horizon.</p>
+<p>The resulting architecture connects data-driven nonlinear modeling with a structured linear predictive-control problem: the GP learns the nonlinear dynamics and reports its confidence, feedback linearization creates the nominal linear representation, and MPC handles optimization and actuator limitations.</p>
+</section>
+
+<section class="modal-project-section project-takeaways">
+<h3>Key Contributions &amp; Objectives</h3>
+<ul>
+<li>Extend <strong>GP-based feedback linearization</strong> by replacing the conventional virtual-input controller with Model Predictive Control.</li>
+<li>Map physical actuator constraints into <strong>state-dependent admissible bounds on the virtual input</strong> optimized by MPC.</li>
+<li>Express the error caused by imperfect feedback linearization as a <strong>matched residual uncertainty</strong> acting on the nominal linearized dynamics.</li>
+<li>Use GP posterior standard deviations to construct an explicit bound on the residual linearization error.</li>
+<li>Establish a foundation for future <strong>robust and uncertainty-aware MPC</strong> formulations based on learned, state-dependent model uncertainty.</li>
+</ul>
+</section>
+
+<section class="modal-project-section project-publication">
+<h3>Research Proposal</h3>
+<p><strong>Constraint-Aware Gaussian-Process Feedback Linearization with Model Predictive Control</strong></p>
+<p>Arash Rahmanidehkordi</p>
+<p>Ongoing research extending GP-based feedback linearization with constraint-aware and uncertainty-aware predictive control.</p>
+</section>
+</div>
